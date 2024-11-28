@@ -54,4 +54,13 @@ wss.on("connection", function connection(socket) {
       }
     }
   })
+
+  socket.on("close", () => {
+    console.log("User disconnected");
+    allSockets = allSockets.filter((client) => client.socket !== socket);
+  });
+
+  socket.on("error", (err) => {
+    console.error("WebSocket error:", err);
+  });
 })
