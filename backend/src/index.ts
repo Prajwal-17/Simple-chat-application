@@ -8,53 +8,50 @@ interface SocketType {
   roomId: string,
 }
 
+//Schema of incoming message
+// {
+//   "type":"join/chat",
+//   "payload":{
+//       "name":"abc",
+//       "roomId":"123456",
+//       "message":"helo"
+//   }
+// }
+
 let allSockets: SocketType[] = []
 
 wss.on("connection", function connection(socket) {
   console.log("user connected");
-  // allSockets.push(socket)
-  // socket.send("hello from server")
 
   socket.on("message", (message) => {
     const parsedMessage = JSON.parse(message as unknown as string);
+
     if (parsedMessage.type === "join") {
       allSockets.push({
         socket,
         roomId: parsedMessage.payload.roomId,
       })
-      console.log(`successfully joined the room ${parsedMessage.payload.roomId}`)
+      // let totalUsers = allSockets.length;
+      let joinMsg = {
+        // "users": totalUsers,
+        "roomId": parsedMessage.payload.roomId,
+      }
+      socket.send(JSON.stringify(joinMsg))
     }
 
     if (parsedMessage.type === "chat") {
       let currentUserRoom = allSockets.find((x) => x.roomId === parsedMessage.payload.roomId)?.roomId;
-      console.log("🚀 ~ socket.on ~ currentUserRoom:", currentUserRoom)
-
 
       for (let i = 0; i < allSockets.length; i++) {
         if (allSockets[i].roomId == currentUserRoom) {
-          allSockets[i].socket.send(parsedMessage.payload.message);
+          const broadcastMsg = {
+            type: "chat",
+            name: parsedMessage.payload.name,
+            message: parsedMessage.payload.message,
+          }
+          allSockets[i].socket.send(JSON.stringify(broadcastMsg));
         }
       }
-
-      // allSockets.forEach((x) => {
-      //   if (x.roomId == currentUserRoom) {
-      //     socket.send(parsedMessage.payload.message)
-      //   }
-      // })
     }
-
-
-    // if (message.toString() === "ping") {
-    //   socket.send("pong")
-    // }
-
-    // allSockets.forEach((s) => {
-    //   s.send(message.toString() + ":sent from server")
-    // })
   })
-
-  // socket.on("disconnect", () => {
-  //   allSockets = allSockets.filter(x => x != socket)
-  // })
-
 })
