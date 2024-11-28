@@ -1,7 +1,9 @@
 import { WebSocketServer, WebSocket } from "ws";
+import dotenv from "dotenv";
+dotenv.config();
 
 //creating a web socket server
-const wss = new WebSocketServer({ port: 8080 })
+const wss = new WebSocketServer({ port: Number(process.env.PORT) || 8080 })
 
 interface SocketType {
   socket: WebSocket,
@@ -63,4 +65,5 @@ wss.on("connection", function connection(socket) {
   socket.on("error", (err) => {
     console.error("WebSocket error:", err);
   });
+
 })
