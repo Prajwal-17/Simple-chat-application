@@ -7,6 +7,8 @@ type MessageType = {
   message: string,
 }
 
+const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
+
 const App = () => {
 
   const [isConnected, setIsConnected] = useState(false)
@@ -49,7 +51,7 @@ const App = () => {
       return;
     }
 
-    const ws = new WebSocket("ws://localhost:8080")
+    const ws = new WebSocket(WEBSOCKET_URL)
 
     ws.onopen = () => {
       let payload = {
