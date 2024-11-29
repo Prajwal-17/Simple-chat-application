@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./components/ui/card"
+import { toast } from "sonner";
 
 type MessageType = {
   type: string,
@@ -25,6 +26,7 @@ const App = () => {
 
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.log("WebSocket not connected or not ready");
+      toast.error("WebSocket not connected or not ready")
       return;
     }
 
@@ -64,6 +66,7 @@ const App = () => {
       }
       ws.send(JSON.stringify(payload))
       setIsConnected(true)
+      toast.success("Successfully joined room")
     }
     setSocket(ws)
     ws.onmessage = (event) => {
@@ -87,7 +90,15 @@ const App = () => {
     }
     setIsConnected(false)
     setRoomId(roomId)
+    toast.success("Room ID generated")
     return roomId
+  }
+
+  const handleRoomCopy = () => {
+    navigator.clipboard.writeText(roomId)
+      .then(() => {
+        toast.info("Copied !!")
+      })
   }
 
   if (!isConnected) {
@@ -145,22 +156,32 @@ const App = () => {
             <CardDescription className="font-medium">temporary chat room</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6">
-            <div className="flex justify-between">
-              <div>Room Count : {roomId}</div>
+            <div className="flex justify-between bg-gray-200 px-3 py-2 rounded-xl">
+              <div className="flex items-center">
+                Room ID : <span className="font-semibold">{roomId}</span>
+                <svg onClick={handleRoomCopy} xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-copy text-gray-600 mx-2 hover:cursor-pointer hover:text-black"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+              </div>
               <div>Users : {users}</div>
             </div>
-            <div className="h-96 px-4 py-4 border-2">
+            <div className="h-96 px-2 py-2 border-2 rounded-lg overflow-auto">
               <div>
                 {allMessages.map((msg, index) => (
-                  <div key={index}>{msg.message}</div>
+                  <div
+                    key={index}
+                    className={`${userName === msg.name ? "text-right" : "text-left"} ${index === 0 ? "mt-2" : "my-5"} `}
+                  >
+                    <div className="bg-[#171717] text-white px-2 py-2 rounded-xl break-words max-w-[80%] inline-block">
+                      {msg.message}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex">
+          <CardFooter className="flex gap-2">
             <input
               type="text"
-              className="flex-grow"
+              className="flex-grow border-2 py-3 px-3 rounded-lg "
               placeholder="Type a message ..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
