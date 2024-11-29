@@ -14,7 +14,7 @@ const App = () => {
 
   const [isConnected, setIsConnected] = useState(false)
   const [socket, setSocket] = useState<WebSocket>()
-  const [users, setUsers] = useState<number>(0)
+  const [roomDisabled, setRoomDisabled] = useState(false)
 
   const [userName, setUserName] = useState<string>("")
   const [roomId, setRoomId] = useState<string>("")
@@ -47,6 +47,7 @@ const App = () => {
   }
 
   const joinRoom = () => {
+    setRoomDisabled(true)
 
     if (!userName || !roomId) {
       console.log("No User name or room id ");
@@ -75,10 +76,14 @@ const App = () => {
       if (data.type == "chat") {
         setAllMessages((msg) => [...msg, data])
       } else {
-        setUsers(0)
         console.log(data.roomId)
       }
     };
+
+    ws.onerror = () => {
+      toast.error("Failed to connect to server")
+      setRoomDisabled(false)
+    }
   }
 
   const generateRoomId = () => {
@@ -138,8 +143,13 @@ const App = () => {
           <CardFooter>
             <button
               onClick={joinRoom}
-              className="w-full bg-gray-500 hover:bg-black text-white py-3 font-semibold rounded-lg">
-              Join Room
+              disabled={roomDisabled}
+              className={`w-full bg-black hover:bg-gray-800 text-white py-3 font-semibold rounded-lg `}>
+              {roomDisabled ? (
+                <span>Joining room ...</span>
+              ) : (
+                <span>Join room</span>
+              )}
             </button>
           </CardFooter>
         </Card>
@@ -159,9 +169,8 @@ const App = () => {
             <div className="flex justify-between bg-gray-200 px-3 py-2 rounded-xl">
               <div className="flex items-center">
                 Room ID : <span className="font-semibold">{roomId}</span>
-                <svg onClick={handleRoomCopy} xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-copy text-gray-600 mx-2 hover:cursor-pointer hover:text-black"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                <svg onClick={handleRoomCopy} xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-copy text-gray-600 mx-2 hover:cursor-pointer hover:text-black"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
               </div>
-              <div>Users : {users}</div>
             </div>
             <div className="h-96 px-2 py-2 border-2 rounded-lg overflow-auto">
               <div>

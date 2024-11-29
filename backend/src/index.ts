@@ -33,9 +33,7 @@ wss.on("connection", function connection(socket) {
         socket,
         roomId: parsedMessage.payload.roomId,
       })
-      // let totalUsers = allSockets.length;
       let joinMsg = {
-        // "users": totalUsers,
         "roomId": parsedMessage.payload.roomId,
       }
       socket.send(JSON.stringify(joinMsg))
